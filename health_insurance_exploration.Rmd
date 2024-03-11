@@ -1,0 +1,69 @@
+---
+title: "Mini Project 1: Health Insurance Analysis"
+author: "Diane Chiang"
+date: "2024-01-18"
+knit: (function(inputFile, encoding) {
+        Sys.setenv(RSTUDIO_PANDOC="/Applications/RStudio.app/Contents/Resources/app/quarto/bin/tools");
+        rmarkdown::render(inputFile,
+                          encoding=encoding, 
+                          output_file=file.path(dirname(inputFile), "hello.pdf")) })
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+HealthInsurance <- read.csv("health_insurance.csv")
+head(HealthInsurance)
+```
+
+## Part A
+### 1. What proportion of the individuals in this dataset have health insurance?
+```{r}
+total_p = nrow(HealthInsurance)
+p_hi = nrow(HealthInsurance[HealthInsurance["insurance"] == "yes",])
+prop_p_hi = p_hi / total_p
+print(prop_p_hi)
+```
+About 80.12% of the individuals has health insurance in this dataset.
+
+
+### 2. Construct a confidence interval for the true population proportion of individuals who have health insurance:
+#### a. What is the estimate for the standard error for the sample proportion of individuals who have health insurance?
+```{r}
+# standard error = sqrt((p * q)/n)
+std_error = sqrt((prop_p_hi * (1 - prop_p_hi)) / total_p)
+print(std_error)
+```
+The estimate for standard error of the sample proportions is around 0.00425
+
+#### b. Construct an (approximate) 95% confidence interval for the true population proportion of individuals who have health insurance
+```{r}
+# conf_int = p' -+ 1.96 * standard_error
+lower_b = prop_p_hi - 1.96 * std_error
+upper_b = prop_p_hi + 1.96 * std_error
+
+print(c(lower_b, upper_b))
+```
+
+#### c. Provide an interpretation for this confidence interval.
+We estimate with 95% confidence that the true population proportion of individuals who have health insurance is approximately between 0.7928 and 0.8095.
+
+### 3. According to census.gov (https://www.census.gov/library/publications/1996/demo/p60-195.html), an estimated 15.4% of individuals were without health insurance in 1995. Taking this 15.4% as the truth and using the data collected from this survey, is there evidence that the proportion of individuals with health insurance changed from 1995 to 1996?
+#### a. Set up the null and alternative hypothesis for this test. Define any relevant notation.
+Let p be the proportion of individuals with health insurance in 1996. The null hypothesis is that p = 0.846 and the alternate hypothesis is that p != 0.846.
+
+#### b. Which sort of test would be appropriate to use here?
+I would conduct the two-tailed significance test of a single population proportion.
+
+#### c. Calculate the relevant test statistic.
+```{r}
+# prop_p_wo_hi = 1 - prop_p_hi
+sd = sqrt((0.846 * (1 - 0.846)) / total_p)
+z_score = (prop_p_hi - 0.846) / sd
+print(z_score)
+print(2*pnorm(q=z_score, lower.tail=TRUE))
+
+test = prop.test(x = p_hi, n = total_p, p = 0.846, alternative = "two.sided", correct = FALSE)
+test
+```
